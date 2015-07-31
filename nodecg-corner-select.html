@@ -1,0 +1,123 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-styles/paper-styles-classes.html">
+<link rel="import" href="../iron-selector/iron-selector.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+
+<dom-module id="nodecg-corner-select">
+    <style>
+        #selector {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .option {
+            width: 50%;
+            margin: 0;
+        }
+
+        .iron-selected {
+            background: var(--paper-light-blue-400);
+            transition: background 125ms linear
+        }
+    </style>
+
+    <template>
+        <div class="paper-font-subhead">{{label}}</div>
+        <iron-selector id="selector">
+            <paper-button class="option" data-vert="top" data-horiz="left">
+                <iron-icon icon="arrow-back" style="transform: rotate(45deg);"></iron-icon>
+            </paper-button>
+            <paper-button class="option" data-vert="top" data-horiz="right">
+                <iron-icon icon="arrow-forward" style="transform: rotate(-45deg);"></iron-icon>
+            </paper-button>
+            <paper-button class="option" data-vert="bottom" data-horiz="left">
+                <iron-icon icon="arrow-back" style="transform: rotate(-45deg);"></iron-icon>
+            </paper-button>
+            <paper-button class="option" data-vert="bottom" data-horiz="right">
+                <iron-icon icon="arrow-forward" style="transform: rotate(45deg);"></iron-icon>
+            </paper-button>
+        </iron-selector>
+    </template>
+</dom-module>
+
+<script>
+    window.NcgCornerSelect = Polymer({
+        is: 'nodecg-corner-select',
+
+        /*
+         * Properties
+         */
+
+        properties: {
+            label: {
+                type: String,
+                reflectToAttribute: true
+            },
+            replicantName: {
+                type: String,
+                reflectToAttribute: true
+            },
+            replicantBundle: {
+                type: String,
+                reflectToAttribute: true
+            }
+        },
+
+        observers: [
+            'updateReplicant(replicantName, replicantBundle)'
+        ],
+
+        updateReplicant: function(name, bundle) {
+            // If there is an existing replicant, remove the event listener
+            if (this.replicant) {
+                this.replicant.removeListener('change', this.replicantChanged);
+            }
+
+            this.replicant = NodeCG.Replicant(name, bundle, {
+                defaultValue: {
+                    horizPos: 'right',
+                    vertPos: 'bottom'
+                }
+            });
+
+            this.replicant.on('change', this.replicantChanged);
+        },
+
+        /*
+         * Lifecycle
+         */
+
+        ready: function() {
+            var self = this;
+            var selector = this.$.selector;
+            selector.addEventListener('iron-select', function(e) {
+                var item = e.detail.item;
+                self.replicant.value = {
+                    horizPos: item.getAttribute('data-horiz'),
+                    vertPos: item.getAttribute('data-vert')
+                };
+            });
+
+            // If `nodecg` is defined and `replicantBundle` is not, default it to `nodecg.bundleName`
+            if (window.nodecg && !this.replicantBundle) {
+                this.replicantBundle = window.nodecg.bundleName;
+            }
+        },
+
+        /*
+         * Events
+         */
+
+        replicantChanged: function(oldVal, newVal) {
+            var selector = this.$.selector;
+            selector.items.forEach(function(item, index) {
+                var vert = item.getAttribute('data-vert');
+                var horiz = item.getAttribute('data-horiz');
+                if (vert === newVal.vertPos && horiz === newVal.horizPos) {
+                    selector.select(index);
+                }
+            });
+        }
+    });
+</script>
