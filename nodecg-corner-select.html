@@ -111,6 +111,8 @@
 
         replicantChanged: function(oldVal, newVal) {
             var selector = this.$.selector;
+
+            // TODO: this sometimes throws a cryptic error, I think items might be undefined sometimes?
             selector.items.forEach(function(item, index) {
                 var vert = item.getAttribute('data-vert');
                 var horiz = item.getAttribute('data-horiz');
