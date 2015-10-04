@@ -74,12 +74,7 @@
                 this.replicant.removeListener('change', this.replicantChanged);
             }
 
-            this.replicant = NodeCG.Replicant(name, bundle, {
-                defaultValue: {
-                    horizPos: 'right',
-                    vertPos: 'bottom'
-                }
-            });
+            this.replicant = NodeCG.Replicant(name, bundle);
 
             this.replicant.on('change', this.replicantChanged.bind(this));
         },
