@@ -54,13 +54,22 @@
                 type: String,
                 reflectToAttribute: true
             },
+            defaultHorizPos: {
+                type: String,
+                value: 'right'
+            },
+            defaultVertPos: {
+                type: String,
+                value: 'bottom'
+            },
             replicantName: {
                 type: String,
                 reflectToAttribute: true
             },
             replicantBundle: {
                 type: String,
-                reflectToAttribute: true
+                reflectToAttribute: true,
+                value: window.nodecg.bundleName
             }
         },
 
@@ -74,7 +83,12 @@
                 this.replicant.removeListener('change', this.replicantChanged);
             }
 
-            this.replicant = NodeCG.Replicant(name, bundle);
+            this.replicant = NodeCG.Replicant(name, bundle, {
+                defaultValue: {
+                    horizPos: this.defaultHorizPos,
+                    vertPos: this.defaultVertPos
+                }
+            });
 
             this.replicant.on('change', this.replicantChanged.bind(this));
         },
