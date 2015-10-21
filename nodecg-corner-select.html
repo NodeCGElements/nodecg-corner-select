@@ -3,46 +3,79 @@
 <link rel="import" href="../paper-styles/paper-styles.html">
 <link rel="import" href="../iron-selector/iron-selector.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
 
 <dom-module id="nodecg-corner-select">
     <style>
-        #selector {
-            display: flex;
-            flex-wrap: wrap;
+        #label {
+            @apply(--paper-font-body2);
+        }
+
+        .row {
+            @apply(--layout-horizontal);
         }
 
         .option {
-            width: 50%;
+            @apply(--layout-flex);
             margin: 0;
         }
 
-        .iron-selected {
+        #metaSelector > :not(.iron-selected) {
+            display: none;
+        }
+
+        .userSelector .iron-selected {
             background: var(--paper-light-blue-400);
             transition: background 125ms linear
         }
     </style>
 
     <template>
-        <div class="paper-font-subhead">{{label}}</div>
-        <iron-selector id="selector">
-            <paper-button class="option" data-vert="top" data-horiz="left">
-                <iron-icon icon="arrow-back" style="transform: rotate(45deg);"></iron-icon>
-            </paper-button>
-            <paper-button class="option" data-vert="top" data-horiz="right">
-                <iron-icon icon="arrow-forward" style="transform: rotate(-45deg);"></iron-icon>
-            </paper-button>
-            <paper-button class="option" data-vert="bottom" data-horiz="left">
-                <iron-icon icon="arrow-back" style="transform: rotate(-45deg);"></iron-icon>
-            </paper-button>
-            <paper-button class="option" data-vert="bottom" data-horiz="right">
-                <iron-icon icon="arrow-forward" style="transform: rotate(45deg);"></iron-icon>
-            </paper-button>
+        <div id="label">{{label}}</div>
+        <iron-selector id="metaSelector" attr-for-selected="type" selected="{{type}}">
+            <iron-selector type="corner" selectable=".option" class="userSelector">
+                <div class="row">
+                    <paper-button class="option" data-vert="top" data-horiz="left">
+                        <iron-icon icon="arrow-back" style="transform: rotate(45deg);"></iron-icon>
+                    </paper-button>
+                    <paper-button class="option" data-vert="top" data-horiz="right">
+                        <iron-icon icon="arrow-forward" style="transform: rotate(-45deg);"></iron-icon>
+                    </paper-button>
+                </div>
+
+                <div class="row">
+                    <paper-button class="option" data-vert="bottom" data-horiz="left">
+                        <iron-icon icon="arrow-back" style="transform: rotate(-45deg);"></iron-icon>
+                    </paper-button>
+                    <paper-button class="option" data-vert="bottom" data-horiz="right">
+                        <iron-icon icon="arrow-forward" style="transform: rotate(45deg);"></iron-icon>
+                    </paper-button>
+                </div>
+            </iron-selector>
+
+            <iron-selector type="vertical" class="userSelector row">
+                <paper-button class="option" data-vert="top">
+                    <iron-icon icon="arrow-back" style="transform: rotate(90deg);"></iron-icon>
+                </paper-button>
+                <paper-button class="option" data-vert="bottom">
+                    <iron-icon icon="arrow-forward" style="transform: rotate(-90deg);"></iron-icon>
+                </paper-button>
+            </iron-selector>
+
+            <iron-selector type="horizontal" class="userSelector row">
+                <paper-button class="option" data-horiz="left">
+                    <iron-icon icon="arrow-back"></iron-icon>
+                </paper-button>
+                <paper-button class="option" data-horiz="right">
+                    <iron-icon icon="arrow-forward"></iron-icon>
+                </paper-button>
+            </iron-selector>
         </iron-selector>
     </template>
 </dom-module>
 
 <script>
-    window.NcgCornerSelect = Polymer({
+    Polymer({
         is: 'nodecg-corner-select',
 
         /*
@@ -51,8 +84,7 @@
 
         properties: {
             label: {
-                type: String,
-                reflectToAttribute: true
+                type: String
             },
             defaultHorizPos: {
                 type: String,
@@ -63,24 +95,26 @@
                 value: 'bottom'
             },
             replicantName: {
-                type: String,
-                reflectToAttribute: true
+                type: String
             },
             replicantBundle: {
                 type: String,
-                reflectToAttribute: true,
                 value: window.nodecg.bundleName
+            },
+            type: {
+                type: String,
+                value: 'corner'
             }
         },
 
         observers: [
-            'updateReplicant(replicantName, replicantBundle)'
+            '_updateReplicant(replicantName, replicantBundle)'
         ],
 
-        updateReplicant: function(name, bundle) {
+        _updateReplicant: function(name, bundle) {
             // If there is an existing replicant, remove the event listener
             if (this.replicant) {
-                this.replicant.removeListener('change', this.replicantChanged);
+                this.replicant.removeListener('change', this._replicantChanged);
             }
 
             this.replicant = NodeCG.Replicant(name, bundle, {
@@ -90,7 +124,7 @@
                 }
             });
 
-            this.replicant.on('change', this.replicantChanged.bind(this));
+            this.replicant.on('change', this._replicantChanged.bind(this));
         },
 
         /*
@@ -99,12 +133,29 @@
 
         ready: function() {
             var self = this;
-            var selector = this.$.selector;
-            selector.addEventListener('iron-select', function(e) {
+
+            var cornerSelector = this.$$('iron-selector[type="corner"]');
+            cornerSelector.addEventListener('iron-select', function(e) {
                 var item = e.detail.item;
                 self.replicant.value = {
                     horizPos: item.getAttribute('data-horiz'),
                     vertPos: item.getAttribute('data-vert')
+                };
+            });
+
+            var verticalSelector = this.$$('iron-selector[type="vertical"]');
+            verticalSelector.addEventListener('iron-select', function(e) {
+                var item = e.detail.item;
+                self.replicant.value = {
+                    vertPos: item.getAttribute('data-vert')
+                };
+            });
+
+            var horizontalSelector = this.$$('iron-selector[type="horizontal"]');
+            horizontalSelector.addEventListener('iron-select', function(e) {
+                var item = e.detail.item;
+                self.replicant.value = {
+                    horizPos: item.getAttribute('data-horiz')
                 };
             });
 
@@ -118,15 +169,29 @@
          * Events
          */
 
-        replicantChanged: function(oldVal, newVal) {
-            var selector = this.$.selector;
-
-            // TODO: this sometimes throws a cryptic error, I think items might be undefined sometimes?
-            selector.items.forEach(function(item, index) {
+        _replicantChanged: function(oldVal, newVal) {
+            var cornerSelector = this.$$('iron-selector[type="corner"]');
+            cornerSelector.items.forEach(function(item, index) {
                 var vert = item.getAttribute('data-vert');
                 var horiz = item.getAttribute('data-horiz');
                 if (vert === newVal.vertPos && horiz === newVal.horizPos) {
-                    selector.select(index);
+                    cornerSelector.select(index);
+                }
+            });
+
+            var verticalSelector = this.$$('iron-selector[type="vertical"]');
+            verticalSelector.items.forEach(function(item, index) {
+                var vert = item.getAttribute('data-vert');
+                if (vert === newVal.vertPos) {
+                    verticalSelector.select(index);
+                }
+            });
+
+            var horizontalSelector = this.$$('iron-selector[type="horizontal"]');
+            horizontalSelector.items.forEach(function(item, index) {
+                var horiz = item.getAttribute('data-horiz');
+                if (horiz === newVal.horizPos) {
+                    horizontalSelector.select(index);
                 }
             });
         }
