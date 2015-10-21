@@ -8,15 +8,11 @@
 <dom-module id="nodecg-corner-select">
     <style>
         #label {
-            @apply(--paper-font-body2);
-        }
-
-        .row {
-            @apply(--layout-horizontal);
+        @apply(--paper-font-body2);
         }
 
         .option {
-            @apply(--layout-flex);
+            width: 50%;
             margin: 0;
         }
 
@@ -24,9 +20,14 @@
             display: none;
         }
 
+        .userSelector {
+        @apply(--layout-horizontal);
+            flex-wrap: wrap;
+        }
+
         .userSelector .iron-selected {
             background: var(--paper-light-blue-400);
-            transition: background 125ms linear
+            transition: background 125ms linear;
         }
     </style>
 
@@ -34,23 +35,19 @@
         <div id="label">{{label}}</div>
         <iron-selector id="metaSelector" attr-for-selected="type" selected="{{type}}">
             <iron-selector type="corner" selectable=".option" class="userSelector">
-                <div class="row">
-                    <paper-button class="option" data-vert="top" data-horiz="left">
-                        <iron-icon icon="arrow-back" style="transform: rotate(45deg);"></iron-icon>
-                    </paper-button>
-                    <paper-button class="option" data-vert="top" data-horiz="right">
-                        <iron-icon icon="arrow-forward" style="transform: rotate(-45deg);"></iron-icon>
-                    </paper-button>
-                </div>
+                <paper-button class="option" data-vert="top" data-horiz="left">
+                    <iron-icon icon="arrow-back" style="transform: rotate(45deg);"></iron-icon>
+                </paper-button>
+                <paper-button class="option" data-vert="top" data-horiz="right">
+                    <iron-icon icon="arrow-forward" style="transform: rotate(-45deg);"></iron-icon>
+                </paper-button>
 
-                <div class="row">
-                    <paper-button class="option" data-vert="bottom" data-horiz="left">
-                        <iron-icon icon="arrow-back" style="transform: rotate(-45deg);"></iron-icon>
-                    </paper-button>
-                    <paper-button class="option" data-vert="bottom" data-horiz="right">
-                        <iron-icon icon="arrow-forward" style="transform: rotate(45deg);"></iron-icon>
-                    </paper-button>
-                </div>
+                <paper-button class="option" data-vert="bottom" data-horiz="left">
+                    <iron-icon icon="arrow-back" style="transform: rotate(-45deg);"></iron-icon>
+                </paper-button>
+                <paper-button class="option" data-vert="bottom" data-horiz="right">
+                    <iron-icon icon="arrow-forward" style="transform: rotate(45deg);"></iron-icon>
+                </paper-button>
             </iron-selector>
 
             <iron-selector type="vertical" class="userSelector row">
@@ -137,26 +134,20 @@
             var cornerSelector = this.$$('iron-selector[type="corner"]');
             cornerSelector.addEventListener('iron-select', function(e) {
                 var item = e.detail.item;
-                self.replicant.value = {
-                    horizPos: item.getAttribute('data-horiz'),
-                    vertPos: item.getAttribute('data-vert')
-                };
+                self.replicant.value.horizPos = item.getAttribute('data-horiz');
+                self.replicant.value.vertPos = item.getAttribute('data-vert');
             });
 
             var verticalSelector = this.$$('iron-selector[type="vertical"]');
             verticalSelector.addEventListener('iron-select', function(e) {
                 var item = e.detail.item;
-                self.replicant.value = {
-                    vertPos: item.getAttribute('data-vert')
-                };
+                self.replicant.value.vertPos = item.getAttribute('data-vert');
             });
 
             var horizontalSelector = this.$$('iron-selector[type="horizontal"]');
             horizontalSelector.addEventListener('iron-select', function(e) {
                 var item = e.detail.item;
-                self.replicant.value = {
-                    horizPos: item.getAttribute('data-horiz')
-                };
+                self.replicant.value.horizPos = item.getAttribute('data-horiz');
             });
 
             // If `nodecg` is defined and `replicantBundle` is not, default it to `nodecg.bundleName`
