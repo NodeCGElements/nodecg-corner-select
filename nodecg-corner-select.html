@@ -4,6 +4,36 @@
 <link rel="import" href="../iron-selector/iron-selector.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../nodecg-replicant/nodecg-replicant-targeting.html">
+
+<!--
+`nodecg-corner-select` is a control used to select the position of an element. It automatically binds to a Replicant
+and therefore propogates changes across the stack.
+
+    <nodecg-corner-select replicant-name="position"></nodecg-corner-select>
+
+By default, it lets the user choose
+one of four corners:
+
+1. Top Left
+2. Top Right
+3. Bottom Right
+4. Bottom Left
+
+If your application only calls for vertical or horizontal positioning and not both, change the `type` attribute:
+
+Default four-corner behavior:
+
+    <nodecg-corner-select replicant-name="position"></nodecg-corner-select>
+
+Only up/down selection:
+
+    <nodecg-corner-select type="vertical" replicant-name="position"></nodecg-corner-select>
+
+Only left/right selection:
+
+    <nodecg-corner-select type="horizontal" replicant-name="position"></nodecg-corner-select>
+-->
 
 <dom-module id="nodecg-corner-select">
     <style>
@@ -75,60 +105,41 @@
     Polymer({
         is: 'nodecg-corner-select',
 
-        /*
-         * Properties
-         */
-
         properties: {
+
+            /**
+             * The label to show above the controls.
+             */
             label: {
                 type: String
             },
-            defaultHorizPos: {
-                type: String,
-                value: 'right'
+
+            /**
+             * The default value to provide to the Replicant.
+             * Must be an object with `horizPos` and `vertPos` properties.
+             */
+            replicantDefault: {
+                type: Object,
+                value: {
+                    horizPos: 'right',
+                    vertPos: 'bottom'
+                }
             },
-            defaultVertPos: {
-                type: String,
-                value: 'bottom'
-            },
-            replicantName: {
-                type: String
-            },
-            replicantBundle: {
-                type: String,
-                value: window.nodecg.bundleName
-            },
+
+            /**
+             * What type of controls to show. Valid values are `corner`, `vertical`, and `horizontal`.
+             */
             type: {
                 type: String,
                 value: 'corner'
             }
         },
 
-        observers: [
-            '_updateReplicant(replicantName, replicantBundle)'
+        behaviors: [
+            Polymer.NodeCGReplicantTargetingBehavior
         ],
 
-        _updateReplicant: function(name, bundle) {
-            // If there is an existing replicant, remove the event listener
-            if (this.replicant) {
-                this.replicant.removeListener('change', this._replicantChanged);
-            }
-
-            this.replicant = NodeCG.Replicant(name, bundle, {
-                defaultValue: {
-                    horizPos: this.defaultHorizPos,
-                    vertPos: this.defaultVertPos
-                }
-            });
-
-            this.replicant.on('change', this._replicantChanged.bind(this));
-        },
-
-        /*
-         * Lifecycle
-         */
-
-        ready: function() {
+        attached: function() {
             var self = this;
 
             var cornerSelector = this.$$('iron-selector[type="corner"]');
@@ -148,17 +159,8 @@
             horizontalSelector.addEventListener('iron-select', function(e) {
                 var item = e.detail.item;
                 self.replicant.value.horizPos = item.getAttribute('data-horiz');
-            });
-
-            // If `nodecg` is defined and `replicantBundle` is not, default it to `nodecg.bundleName`
-            if (window.nodecg && !this.replicantBundle) {
-                this.replicantBundle = window.nodecg.bundleName;
-            }
+            })
         },
-
-        /*
-         * Events
-         */
 
         _replicantChanged: function(oldVal, newVal) {
             var cornerSelector = this.$$('iron-selector[type="corner"]');
