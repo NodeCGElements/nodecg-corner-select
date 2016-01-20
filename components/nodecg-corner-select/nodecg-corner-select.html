@@ -1,0 +1,192 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-styles/paper-styles.html">
+<link rel="import" href="../iron-selector/iron-selector.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../nodecg-replicant/nodecg-replicant-targeting.html">
+
+<!--
+`nodecg-corner-select` is a control used to select the position of an element. It automatically binds to a Replicant
+and therefore propogates changes across the stack.
+
+    <nodecg-corner-select replicant-name="position"></nodecg-corner-select>
+
+By default, it lets the user choose
+one of four corners:
+
+1. Top Left
+2. Top Right
+3. Bottom Right
+4. Bottom Left
+
+If your application only calls for vertical or horizontal positioning and not both, change the `type` attribute:
+
+Default four-corner behavior:
+
+    <nodecg-corner-select replicant-name="position"></nodecg-corner-select>
+
+Only up/down selection:
+
+    <nodecg-corner-select type="vertical" replicant-name="position"></nodecg-corner-select>
+
+Only left/right selection:
+
+    <nodecg-corner-select type="horizontal" replicant-name="position"></nodecg-corner-select>
+-->
+
+<dom-module id="nodecg-corner-select">
+    <style>
+        #label {
+        @apply(--paper-font-body2);
+        }
+
+        .option {
+            width: 50%;
+            margin: 0;
+        }
+
+        #metaSelector > :not(.iron-selected) {
+            display: none;
+        }
+
+        .userSelector {
+        @apply(--layout-horizontal);
+            flex-wrap: wrap;
+        }
+
+        .userSelector .iron-selected {
+            background: var(--paper-light-blue-400);
+            transition: background 125ms linear;
+        }
+    </style>
+
+    <template>
+        <div id="label">{{label}}</div>
+        <iron-selector id="metaSelector" attr-for-selected="type" selected="{{type}}">
+            <iron-selector type="corner" selectable=".option" class="userSelector">
+                <paper-button class="option" data-vert="top" data-horiz="left">
+                    <iron-icon icon="arrow-back" style="transform: rotate(45deg);"></iron-icon>
+                </paper-button>
+                <paper-button class="option" data-vert="top" data-horiz="right">
+                    <iron-icon icon="arrow-forward" style="transform: rotate(-45deg);"></iron-icon>
+                </paper-button>
+
+                <paper-button class="option" data-vert="bottom" data-horiz="left">
+                    <iron-icon icon="arrow-back" style="transform: rotate(-45deg);"></iron-icon>
+                </paper-button>
+                <paper-button class="option" data-vert="bottom" data-horiz="right">
+                    <iron-icon icon="arrow-forward" style="transform: rotate(45deg);"></iron-icon>
+                </paper-button>
+            </iron-selector>
+
+            <iron-selector type="vertical" class="userSelector row">
+                <paper-button class="option" data-vert="top">
+                    <iron-icon icon="arrow-back" style="transform: rotate(90deg);"></iron-icon>
+                </paper-button>
+                <paper-button class="option" data-vert="bottom">
+                    <iron-icon icon="arrow-forward" style="transform: rotate(-90deg);"></iron-icon>
+                </paper-button>
+            </iron-selector>
+
+            <iron-selector type="horizontal" class="userSelector row">
+                <paper-button class="option" data-horiz="left">
+                    <iron-icon icon="arrow-back"></iron-icon>
+                </paper-button>
+                <paper-button class="option" data-horiz="right">
+                    <iron-icon icon="arrow-forward"></iron-icon>
+                </paper-button>
+            </iron-selector>
+        </iron-selector>
+    </template>
+</dom-module>
+
+<script>
+    Polymer({
+        is: 'nodecg-corner-select',
+
+        properties: {
+
+            /**
+             * The label to show above the controls.
+             */
+            label: {
+                type: String
+            },
+
+            /**
+             * The default value to provide to the Replicant.
+             * Must be an object with `horizPos` and `vertPos` properties.
+             */
+            replicantDefault: {
+                type: Object,
+                value: {
+                    horizPos: 'right',
+                    vertPos: 'bottom'
+                }
+            },
+
+            /**
+             * What type of controls to show. Valid values are `corner`, `vertical`, and `horizontal`.
+             */
+            type: {
+                type: String,
+                value: 'corner'
+            }
+        },
+
+        behaviors: [
+            Polymer.NodeCGReplicantTargetingBehavior
+        ],
+
+        attached: function() {
+            var self = this;
+
+            var cornerSelector = this.$$('iron-selector[type="corner"]');
+            cornerSelector.addEventListener('iron-select', function(e) {
+                var item = e.detail.item;
+                self.replicant.value.horizPos = item.getAttribute('data-horiz');
+                self.replicant.value.vertPos = item.getAttribute('data-vert');
+            });
+
+            var verticalSelector = this.$$('iron-selector[type="vertical"]');
+            verticalSelector.addEventListener('iron-select', function(e) {
+                var item = e.detail.item;
+                self.replicant.value.vertPos = item.getAttribute('data-vert');
+            });
+
+            var horizontalSelector = this.$$('iron-selector[type="horizontal"]');
+            horizontalSelector.addEventListener('iron-select', function(e) {
+                var item = e.detail.item;
+                self.replicant.value.horizPos = item.getAttribute('data-horiz');
+            })
+        },
+
+        _replicantChanged: function(oldVal, newVal) {
+            var cornerSelector = this.$$('iron-selector[type="corner"]');
+            cornerSelector.items.forEach(function(item, index) {
+                var vert = item.getAttribute('data-vert');
+                var horiz = item.getAttribute('data-horiz');
+                if (vert === newVal.vertPos && horiz === newVal.horizPos) {
+                    cornerSelector.select(index);
+                }
+            });
+
+            var verticalSelector = this.$$('iron-selector[type="vertical"]');
+            verticalSelector.items.forEach(function(item, index) {
+                var vert = item.getAttribute('data-vert');
+                if (vert === newVal.vertPos) {
+                    verticalSelector.select(index);
+                }
+            });
+
+            var horizontalSelector = this.$$('iron-selector[type="horizontal"]');
+            horizontalSelector.items.forEach(function(item, index) {
+                var horiz = item.getAttribute('data-horiz');
+                if (horiz === newVal.horizPos) {
+                    horizontalSelector.select(index);
+                }
+            });
+        }
+    });
+</script>

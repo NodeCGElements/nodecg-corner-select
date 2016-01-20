@@ -1,0 +1,44 @@
+{
+  "name": "nodecg-corner-select",
+  "homepage": "https://github.com/NodeCGElements/nodecg-corner-select",
+  "authors": [
+    "Alex Van Camp <email@alexvan.camp>"
+  ],
+  "description": "A NodeCG dashboard element to easily select a corner.",
+  "main": "nodecg-corner-select.html",
+  "keywords": [
+    "Polymer",
+    "element",
+    "nodecg",
+    "dashboard",
+    "corner"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "paper-button": "PolymerElements/paper-button#^1.0.3",
+    "iron-selector": "PolymerElements/iron-selector#^1.0.2",
+    "iron-icons": "PolymerElements/iron-icons#^1.0.3",
+    "iron-flex-layout": "PolymerElements/iron-flex-layout#^1.0.4",
+    "nodecg-replicant": "NodeCGElements/nodecg-replicant#~0.5.4"
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.1.4"
+  },
+  "_release": "ebcdb29142",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "ebcdb2914213492d8d2e552fd94892afd26878d4"
+  },
+  "_source": "git://github.com/NodeCGElements/nodecg-corner-select.git",
+  "_target": "master",
+  "_originalSource": "NodeCGElements/nodecg-corner-select",
+  "_direct": true
+}
